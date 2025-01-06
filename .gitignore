@@ -1,0 +1,17 @@
+.gradle
+.settings
+.checkstyle
+.classpath
+.project
+.vscode
+google-java-format_windows-x86-64.exe
+/build
+/BunnyHop
+/bin
+/App/Log
+/App/Compiled
+/App/BhExecEnvLog
+/App/Actions/open_jtalk
+/App/net.seapanda.bunnyhop.jar
+/App/BhProgramExecEnvironment.jar
+/App/Jlib
