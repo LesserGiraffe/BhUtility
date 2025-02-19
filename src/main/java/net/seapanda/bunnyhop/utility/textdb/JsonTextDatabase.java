@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility;
+package net.seapanda.bunnyhop.utility.textdb;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -33,11 +33,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
- * アプリケーションの出力テキスト管理クラス.
+ * Json 形式で定義されたテキストデータを取得する機能を提供するクラス.
  *
  * @author K.Koike
  */
-public class TextDatabase {
+public class JsonTextDatabase implements TextDatabase {
   
   /** テキストのデータベース. */
   Map<TextId, String> database = new ConcurrentHashMap<>();
@@ -47,7 +47,7 @@ public class TextDatabase {
    *
    * @param filePath テキストデータが定義された JSON ファイルのパス.
    */
-  public TextDatabase(Path filePath) throws
+  public JsonTextDatabase(Path filePath) throws
       IOException,
       JsonIOException,
       JsonSyntaxException {
@@ -56,6 +56,17 @@ public class TextDatabase {
       JsonObject jsonObj = gson.fromJson(jr, JsonObject.class);
       createDatabase(new LinkedList<String>(), jsonObj);
     }
+  }
+
+  /**
+   * {@code jsonStr} に入力された JSON 文字列からテキストデータのデータベースを構築する.
+   *
+   * @param jsonStr テキストデータが定義された JSON 文字列.
+   */
+  public JsonTextDatabase(String jsonStr) throws JsonSyntaxException {
+    var gson = new Gson();
+    JsonObject jsonObj = gson.fromJson(jsonStr, JsonObject.class);
+    createDatabase(new LinkedList<String>(), jsonObj);
   }
 
   /**
@@ -81,16 +92,7 @@ public class TextDatabase {
     }
   }
 
-  /**
-   * テキストを取得する.
-   *
-   * @param id 取得するテキストの ID
-   * @param objs 空でない場合, {@code path} で取得したテキストデータに {@link String#format} を適用し,
-   *             その引数にこれらのオブジェクトを渡す.
-   * @return {@code id} と {@code objs} から作成された文字列.
-   *         {@code id} に対応するテキストデータが見つからない場合は, 空の文字列を返す.
-   *         {@code objs} によるフォーマットに失敗した場合は,  空の文字列を返す.
-   */
+  @Override
   public String get(TextId id, Object... objs) {
     try {
       if (!database.containsKey(id)) {
@@ -122,6 +124,7 @@ public class TextDatabase {
    *         {@code path} に対応するテキストデータが見つからない場合は, 空の文字列を返す.
    *         {@code objs} によるフォーマットに失敗した場合は,  空の文字列を返す.
    */
+  @Override
   public String get(List<String> path, Object... objs) {
     try {
       var id = TextId.of(path);
@@ -150,71 +153,8 @@ public class TextDatabase {
    *             最後の JSON value に対応するテキストデータを取得する.
    * @return テキスト
    */
+  @Override
   public String get(String... path) {
     return database.getOrDefault(TextId.of(path), "");
-  }
-
-
-  /** JSON フォーマットで定義されたテキストデータの識別子. */
-  public static class TextId {
-
-    /** テキストデータの ID が存在しないことを表すオブジェクト. */
-    public static final TextId NONE = TextId.of();
-
-    private final List<String> path;
-
-    private TextId(List<String> path) {
-      if (path == null) {
-        path = new ArrayList<String>();
-      }
-      this.path = path;
-    }
-
-    private TextId(String... path) {
-      if (path == null) {
-        path = new String[] {};
-      }
-      this.path = List.of(path);
-    }
-
-    /**
-     * {@link TextId} を作成する.
-     *
-     * @param path このリストの要素を JSON key として JSON のトップオブジェクトから順に JSON value を参照したときの
-     *             最後の JSON value に対応する ID が作成される.
-     * @return {@link TextId} オブジェクト.
-     */
-    public static TextId of(List<String> path) {
-      return new TextId(path);
-    }
-
-    /**
-     * {@link TextId} を作成する.
-     *
-     * @param path この配列の要素を JSON key として JSON のトップオブジェクトから順に JSON value を参照したときの
-     *             最後の JSON value に対応する ID が作成される.
-     * @return {@link TextId} オブジェクト.
-     */
-    public static TextId of(String... path) {
-      return new TextId(path);
-    }
-
-    @Override
-    public String toString() {
-      return path.stream().reduce("", (a, b) -> "%s.%s".formatted(a, b));
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof TextId other) {
-        return path.equals(other.path);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return path.hashCode();
-    }
   }
 }
