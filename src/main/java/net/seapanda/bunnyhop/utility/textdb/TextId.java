@@ -16,17 +16,14 @@ public class TextId {
   private final List<String> path;
 
   private TextId(List<String> path) {
-    if (path == null) {
-      path = new ArrayList<String>();
-    }
-    this.path = path;
+    this.path = (path == null) ? new ArrayList<>() : new ArrayList<>(path);
   }
 
   private TextId(String... path) {
     if (path == null) {
       path = new String[] {};
     }
-    this.path = List.of(path);
+    this.path = new ArrayList<>(List.of(path));
   }
 
   /**
