@@ -34,6 +34,9 @@ import java.util.concurrent.TimeoutException;
  */
 public final class SynchronizingTimer {
 
+  public static final int MIN_COUNT = 0;
+  public static final int MAX_COUNT = 65535;
+
   private final Phaser phaser;
   private int resetVal;
   /** 自動リセットが有効かどうか. */
@@ -42,11 +45,12 @@ public final class SynchronizingTimer {
   /**
    * コンストラクタ.
    *
-   * @param count タイマーの初期値. (0以上, 65535以下を指定すること)
+   * @param count タイマーの初期値. ({@link #MIN_COUNT} 以上, {@link #MAX_COUNT} 以下を指定すること)
    */
   public SynchronizingTimer(int count, boolean autoReset) {
-    if (count < 0 || count > 65535) {
-      throw new IllegalArgumentException("The 'count' must be 0 - 65535.  (%s)".formatted(count));
+    if (count < MIN_COUNT || count > MAX_COUNT) {
+      throw new IllegalArgumentException(
+          "The 'count' must be %s - %s.  (%s)".formatted(MIN_COUNT, MAX_COUNT, count));
     }
     resetVal = count;
     this.autoReset = autoReset;
@@ -81,17 +85,13 @@ public final class SynchronizingTimer {
    * 呼び出した時点でのフェーズに対応する登録済みパーティ数を取得する.
    * </pre>
    *
-   * @return
-   *     <pre>
-   *     v1 : パーティ数を減らす前の {@code phaser} のフェーズ
-   *     v2 : パーティ数を減らす前の {@code phaser} の登録済みパーティ数
-   *     </pre>
+   * @return パーティ数を減らす前の {@link Phaser} のフェーズと登録済みパーティ数
    */
-  private synchronized Pair<Integer, Integer> deregister() {
+  private synchronized PhaserStatus deregister() {
     int phase = phaser.getPhase();
     int registeredParties = phaser.getRegisteredParties();
     if (registeredParties == 0) {
-      return new Pair<>(phase, registeredParties);
+      return new PhaserStatus(phase, registeredParties);
     }
     if (resetVal == 0) {
       throw new AssertionError();
@@ -102,7 +102,7 @@ public final class SynchronizingTimer {
     if (phaser.getRegisteredParties() == 0 && autoReset) {
       phaser.bulkRegister(resetVal);
     }
-    return new Pair<>(phase, registeredParties);
+    return new PhaserStatus(phase, registeredParties);
   }
 
   /**
@@ -111,13 +111,7 @@ public final class SynchronizingTimer {
    */
   public void countdownAndAwait() {
     try {
-      Pair<Integer, Integer> phaseAndParties = deregister();
-      int registeredParties = phaseAndParties.v2;
-      if (registeredParties == 0) {
-        return;
-      }
-      int phase = phaseAndParties.v1;
-      phaser.awaitAdvanceInterruptibly(phase);
+      countdownAndAwaitInterruptibly();
     } catch (InterruptedException e) { /* do nothing */ }
   }
 
@@ -130,13 +124,7 @@ public final class SynchronizingTimer {
    */
   public void countdownAndAwait(long timeout, TimeUnit unit) {
     try {
-      Pair<Integer, Integer> phaseAndParties = deregister();
-      int registeredParties = phaseAndParties.v2;
-      if (registeredParties == 0) {
-        return;
-      }
-      int phase = phaseAndParties.v1;
-      phaser.awaitAdvanceInterruptibly(phase, timeout, unit);
+      countdownAndAwaitInterruptibly(timeout, unit);
     } catch (InterruptedException | TimeoutException e) { /* do nothing */ }
   }
 
@@ -163,17 +151,41 @@ public final class SynchronizingTimer {
     } catch (InterruptedException | TimeoutException e) { /* do nothing */ }
   }
 
+  /** タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ. */
+  public void countdownAndAwaitInterruptibly() throws InterruptedException {
+    try {
+      PhaserStatus status = deregister();
+      if (status.numParties() == 0) {
+        return;
+      }
+      phaser.awaitAdvanceInterruptibly(status.phase());
+    } catch (InterruptedException e) { /* do nothing */ }
+  }
+
+  /**
+   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
+   *
+   * @param timeout 最大待ち時間
+   * @param unit 待ち時間の単位
+   */
+  public void countdownAndAwaitInterruptibly(long timeout, TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+    PhaserStatus status = deregister();
+    if (status.numParties() == 0) {
+      return;
+    }
+    phaser.awaitAdvanceInterruptibly(status.phase(), timeout, unit);
+  }
+
   /** タイマーのカウントが 0 になるまで待つ. */
   public void awaitInterruptibly() throws InterruptedException {
-    Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
-    int registeredParties = phaseAndParties.v2;
-    if (registeredParties == 0) {
+    PhaserStatus status = getPhaserStatus();
+    if (status.numParties() == 0) {
       return;
     }
     // ここで reset(0) によって登録済みパーティ数が 0 になっても, フェーズが変わるので,
     // 登録済みパーティ数 0 のフェーズで待ち続けることはない.
-    int phase = phaseAndParties.v1;
-    phaser.awaitAdvanceInterruptibly(phase);
+    phaser.awaitAdvanceInterruptibly(status.phase);
   }
 
   /**
@@ -184,25 +196,23 @@ public final class SynchronizingTimer {
    */
   public void awaitInterruptibly(long timeout, TimeUnit unit)
       throws InterruptedException, TimeoutException {
-
-    Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
-    int registeredParties = phaseAndParties.v2;
-    if (registeredParties == 0) {
+    PhaserStatus status = getPhaserStatus();
+    if (status.numParties() == 0) {
       return;
     }
-    int phase = phaseAndParties.v1;
-    phaser.awaitAdvanceInterruptibly(phase, timeout, unit);
+    phaser.awaitAdvanceInterruptibly(status.phase, timeout, unit);
   }
 
   /**
    * タイマーをリセットする.
    *
-   * @param count セットするカウンタ値. (0以上, 65535以下を指定すること)
+   * @param count セットするカウンタ値. ({@link #MIN_COUNT} 以上, {@link #MAX_COUNT} 以下を指定すること)
    * @throws IllegalArgumentException {@code count} の範囲が不正な場合.
    */
   public synchronized void reset(int count) {
-    if (count < 0 || count > 65535) {
-      throw new IllegalArgumentException("The 'count' must be 0 - 65535.  (%s)".formatted(count));
+    if (count < MIN_COUNT || count > MAX_COUNT) {
+      throw new IllegalArgumentException(
+          "The 'count' must be %s - %s.  (%s)".formatted(MIN_COUNT, MAX_COUNT, count));
     }
     resetVal = count;
     int currentCount = phaser.getRegisteredParties();
@@ -222,23 +232,27 @@ public final class SynchronizingTimer {
    * @return 現在のカウンタ値
    */
   public int getCount() {
-    return getPhaseAndRegisteredParties().v2;
+    return getPhaserStatus().numParties();
   }
 
   /**
-   * フェーズと登録済みパーティ数を取得する.
+   * {@link Phaser} フェーズと登録済みパーティ数を取得する.
    * <pre>
    * 登録済みパーティ数とフェーズを変更する可能性のある操作と排他にすることで,
    * 呼び出した時点でのフェーズに対応する登録済みパーティ数を取得する.
    * </pre>
    *
-   * @return
-   *     <pre>
-   *     v1 : {@code phaser} のフェーズ
-   *     v2 : {@code phaser} の登録済みパーティ数
-   *     </pre>
+   * @return {@link Phaser} のフェーズと登録済みパーティ数.
    */
-  private synchronized Pair<Integer, Integer> getPhaseAndRegisteredParties() {
-    return new Pair<>(phaser.getPhase(), phaser.getRegisteredParties());
+  private synchronized PhaserStatus getPhaserStatus() {
+    return new PhaserStatus(phaser.getPhase(), phaser.getRegisteredParties());
   }
+
+  /**
+   * フェーズと登録済みパーティ数を格納するレコード.
+   *
+   * @param phase {@link Phaser} のフェーズ
+   * @param numParties {@link Phaser} の登録済みパーティ数
+   */
+  private record PhaserStatus(int phase, int numParties) {}
 }
