@@ -34,7 +34,9 @@ import java.util.concurrent.TimeoutException;
  */
 public final class SynchronizingTimer {
 
+  /** タイマーのカウンタの最小値. */
   public static final int MIN_COUNT = 0;
+  /** タイマーのカウンタの最大値.  この値は {@link Phaser} の実装による制限から来る. */
   public static final int MAX_COUNT = 65535;
 
   private final Phaser phaser;
