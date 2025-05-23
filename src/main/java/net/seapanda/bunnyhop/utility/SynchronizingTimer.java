@@ -147,10 +147,10 @@ public final class SynchronizingTimer {
    * @param timeout 最大待ち時間
    * @param unit 待ち時間の単位
    */
-  public void await(long timeout, TimeUnit unit) {
+  public void await(long timeout, TimeUnit unit) throws TimeoutException {
     try {
       awaitInterruptibly(timeout, unit);
-    } catch (InterruptedException | TimeoutException e) { /* do nothing */ }
+    } catch (InterruptedException e) { /* do nothing */ }
   }
 
   /** タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ. */
