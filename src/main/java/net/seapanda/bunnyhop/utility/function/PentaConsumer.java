@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility;
+package net.seapanda.bunnyhop.utility.function;
 
 import java.util.Objects;
 
 /**
- * 4 つの引数をとるコンシューマメソッド.
+ * 5 つの引数をとるコンシューマメソッド.
  *
  * @author K.Koike
  */
 @FunctionalInterface
-public interface TetraConsumer<T, U, V, W> {
+public interface PentaConsumer<S, T, U, V, W> {
   
-  void accept(T t, U u, V v, W w);
+  void accept(S s, T t, U u, V v, W w);
 
   /**
    * このオブジェクトの {@link #accept} の後に {@link #accept} と同じ引数で
    * {@code after} を呼ぶメソッドを返す.
    */
-  default TetraConsumer<T, U, V, W> andThen(
-      final TetraConsumer<? super T, ? super U, ? super V, ? super W> after) {
+  default PentaConsumer<S, T, U, V, W> andThen(
+      final PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> after) {
     Objects.requireNonNull(after);
-    return (t, u, v, w) -> {
-      accept(t, u, v, w);
-      after.accept(t, u, v, w);
+    return (s, t, u, v, w) -> {
+      accept(s, t, u, v, w);
+      after.accept(s, t, u, v, w);
     };
   }
 }

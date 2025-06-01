@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility;
+package net.seapanda.bunnyhop.utility.concurrent;
 
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
