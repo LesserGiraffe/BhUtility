@@ -19,6 +19,7 @@ package net.seapanda.bunnyhop.utility;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * アプリケーション全体で使用する様々な処理をまとめたクラス.
@@ -43,7 +44,10 @@ public class Utility {
     }
 
     String[] paths = pathStr.split(ps);
-    pathStr = paths[paths.length - 1];
+    pathStr = Arrays.stream(paths)
+        .filter(path -> path.contains("Jlib"))
+        .findFirst()
+        .orElse(pathStr);
     File jarFile = new File(pathStr);
     Path jarPath = Paths.get(jarFile.getAbsolutePath());
     String root = (jarPath.getRoot() == null) ? "" : jarPath.getRoot().toString();
