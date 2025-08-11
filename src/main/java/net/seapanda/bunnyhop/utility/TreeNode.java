@@ -45,7 +45,7 @@ public class TreeNode<T> {
   /** 子要素を追加する. */
   public void addChild(TreeNode<T> child) {
     child.parent = this;
-    if (!children.contains(child) && child != null) {
+    if (!children.contains(child)) {
       children.add(child);
     }
   }

@@ -28,7 +28,7 @@ import java.util.SequencedCollection;
  */
 public class TetraConsumerInvoker<T, U, V, W> {
 
-  private Registry registry = new Registry();
+  private final Registry registry = new Registry();
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -62,8 +62,8 @@ public class TetraConsumerInvoker<T, U, V, W> {
 
     private TetraConsumer<? super T, ? super U, ? super V, ? super W> first = (t, u, v, w) -> {};
     private TetraConsumer<? super T, ? super U, ? super V, ? super W> last = (t, u, v, w) -> {};
-    private SequencedCollection<TetraConsumer<? super T, ? super U, ? super V, ? super W>> funcs =
-        new ArrayList<>();
+    private final SequencedCollection<TetraConsumer<? super T, ? super U, ? super V, ? super W>>
+        funcs = new ArrayList<>();
 
     /**
      * {@code fn} をこのレジストリに登録する.

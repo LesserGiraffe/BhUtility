@@ -42,7 +42,7 @@ public final class SynchronizingTimer {
   private final Phaser phaser;
   private int resetVal;
   /** 自動リセットが有効かどうか. */
-  private boolean autoReset;
+  private final boolean autoReset;
 
   /**
    * コンストラクタ.

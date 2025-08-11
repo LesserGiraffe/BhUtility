@@ -17,6 +17,7 @@
 package net.seapanda.bunnyhop.utility;
 
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -31,8 +32,8 @@ public class Utility {
   /** 実行時jarパス. */
   public static final String execPath;
   public static final String javaPath;
-  public static final String ps = System.getProperty("path.separator");
-  public static final String fs = System.getProperty("file.separator");
+  public static final String ps = File.pathSeparator;
+  public static final String fs = FileSystems.getDefault().getSeparator();
   private static final String osName = System.getProperty("os.name").toLowerCase();
 
   static {
@@ -73,7 +74,7 @@ public class Utility {
    *                    ....
    *               n : n - 1 で取得できるメソッドを呼び出したメソッド.
    *               </pre>
-   * @retrun {@code callee} で指定したメソッド名.  コールスタックから情報を取得できなかった場合は空の文字列.
+   * @return {@code callee} で指定したメソッド名.  コールスタックから情報を取得できなかった場合は空の文字列.
    */
   public static String getMethodName(int callee) {
     StackTraceElement[] elems = Thread.currentThread().getStackTrace();

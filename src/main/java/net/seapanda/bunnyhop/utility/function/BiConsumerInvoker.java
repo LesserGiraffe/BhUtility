@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
  */
 public class BiConsumerInvoker<U, V> {
 
-  private Registry registry = new Registry();
+  private final Registry registry = new Registry();
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -61,7 +61,7 @@ public class BiConsumerInvoker<U, V> {
 
     private BiConsumer<? super U, ? super V> first = (u, v) -> {};
     private BiConsumer<? super U, ? super V> last = (u, v) -> {};
-    private SequencedCollection<BiConsumer<? super U, ? super V>> funcs = new ArrayList<>();
+    private final SequencedCollection<BiConsumer<? super U, ? super V>> funcs = new ArrayList<>();
 
     /**
      * {@code fn} をこのレジストリに登録する.

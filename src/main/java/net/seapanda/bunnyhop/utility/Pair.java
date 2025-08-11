@@ -34,22 +34,20 @@ public class Pair<T1, T2> {
   }
 
   private static boolean equals(Object obj1, Object obj2) {
-    return (obj1 == null) ? (obj2 == null) : obj1.equals(obj2);
+    return Objects.equals(obj1, obj2);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof Pair)) {
+    if (!(obj instanceof Pair<?, ?> pair)) {
       return false;
     }
-    Pair<?, ?> pair = (Pair<?, ?>) obj;
     return equals(v1, pair.v1) && equals(v2, pair.v2);
   }
 
   @Override
   public int hashCode() {
     int hash = Objects.hashCode(this.v1);
-    hash = 79 * hash + Objects.hashCode(this.v2);
-    return hash;
+    return 79 * hash + Objects.hashCode(this.v2);
   }
 }

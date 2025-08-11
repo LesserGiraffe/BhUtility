@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class ConsumerInvoker<U> {
 
-  private Registry registry = new Registry();
+  private final Registry registry = new Registry();
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -60,7 +60,7 @@ public class ConsumerInvoker<U> {
 
     private Consumer<? super U> first = u -> {};
     private Consumer<? super U> last = u -> {};
-    private SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
+    private final SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
 
     /**
      * {@code fn} をこのレジストリに登録する.

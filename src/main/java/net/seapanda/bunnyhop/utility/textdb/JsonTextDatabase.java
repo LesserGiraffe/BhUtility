@@ -104,10 +104,10 @@ public class JsonTextDatabase implements TextDatabase {
       return database.get(id).formatted(objs);
     } catch (Exception e) {
       String objsStr = Stream.of(objs)
-          .map(obj -> obj.toString())
-          .reduce("", (a, b) -> "%s, %s".formatted(a, b));
-      System.err.println(String.format(
-          "Failed to generate a text.  id = %s, objs = %s\n%s".formatted(id, objsStr, e)));
+          .map(Object::toString)
+          .reduce("", "%s, %s"::formatted);
+      System.err.printf(
+          ("Failed to generate a text.  id = %s, objs = %s\n%s".formatted(id, objsStr, e)) + "%n");
       return "";
     }
   }
@@ -136,10 +136,10 @@ public class JsonTextDatabase implements TextDatabase {
       }
       return database.get(id).formatted(objs);
     } catch (Exception e) {
-      String pathStr = path.stream().reduce("", (a, b) -> "%s, %s".formatted(a, b));
+      String pathStr = path.stream().reduce("", "%s, %s"::formatted);
       String objsStr = Stream.of(objs)
-          .map(obj -> obj.toString())
-          .reduce("", (a, b) -> "%s, %s".formatted(a, b));      
+          .map(Object::toString)
+          .reduce("", "%s, %s"::formatted);
       System.err.println(String.format(
           "Failed to generate a text.  id = %s, objs = %s\n%s".formatted(pathStr, objsStr, e)));
       return "";

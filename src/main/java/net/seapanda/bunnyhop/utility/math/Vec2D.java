@@ -153,9 +153,8 @@ public class Vec2D implements Serializable {
 
   @Override
   public int hashCode() {
-    int hash = (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
-    hash = 67 * hash
-        + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+    int hash = Long.hashCode(Double.doubleToLongBits(this.x));
+    hash = 67 * hash + Long.hashCode(Double.doubleToLongBits(this.y));
     return hash;
   }
 

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SerialNumber implements Serializable {
   
-  private static AtomicLong serialNumber = new AtomicLong(0);
+  private static final AtomicLong serialNumber = new AtomicLong(0);
   private final String hexStr;
   private final long val;
 

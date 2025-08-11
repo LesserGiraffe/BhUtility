@@ -28,7 +28,7 @@ import java.util.SequencedCollection;
  */
 public class TriConsumerInvoker<U, V, W> {
 
-  private Registry registry = new Registry();
+  private final Registry registry = new Registry();
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -61,7 +61,7 @@ public class TriConsumerInvoker<U, V, W> {
 
     private TriConsumer<? super U, ? super V, ? super W> first = (u, v, w) -> {};
     private TriConsumer<? super U, ? super V, ? super W> last = (u, v, w) -> {};
-    private SequencedCollection<TriConsumer<? super U, ? super V, ? super W>> funcs =
+    private final SequencedCollection<TriConsumer<? super U, ? super V, ? super W>> funcs =
         new ArrayList<>();
 
     /**

@@ -50,7 +50,7 @@ public class TextId {
 
   @Override
   public String toString() {
-    return path.stream().reduce("", (a, b) -> "%s.%s".formatted(a, b));
+    return path.stream().reduce("", "%s.%s"::formatted);
   }
 
   @Override

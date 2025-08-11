@@ -49,7 +49,7 @@ public abstract class Version implements Serializable {
       return;
     }
     Matcher matcher =
-        Pattern.compile("([a-zA-Z0-9]+)\\-(\\d+)\\.(\\d+)\\.(\\d+)").matcher(version);
+        Pattern.compile("([a-zA-Z0-9]+)-(\\d+)\\.(\\d+)\\.(\\d+)").matcher(version);
     if (version == null || !matcher.find()) {
       throw new IllegalArgumentException("Invalid BunnyHop version format (%s)".formatted(version));
     }

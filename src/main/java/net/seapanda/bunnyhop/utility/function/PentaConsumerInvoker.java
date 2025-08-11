@@ -28,7 +28,7 @@ import java.util.SequencedCollection;
  */
 public class PentaConsumerInvoker<S, T, U, V, W> {
 
-  private Registry registry = new Registry();
+  private final Registry registry = new Registry();
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -65,7 +65,7 @@ public class PentaConsumerInvoker<S, T, U, V, W> {
         (s, t, u, v, w) -> {};
     private PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> last =
         (s, t, u, v, w) -> {};
-    private SequencedCollection<PentaConsumer<
+    private final SequencedCollection<PentaConsumer<
         ? super S, ? super T, ? super U, ? super V, ? super W>> funcs = new ArrayList<>();
 
     /**

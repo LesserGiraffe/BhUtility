@@ -32,10 +32,6 @@ public interface Showable {
 
   /** インデント分の空白文字を返す. */
   default String indent(int depth) {
-    String ret = "";
-    for (int i = 0; i < depth; ++i) {
-      ret += "  ";
-    }
-    return ret;
+    return "  ".repeat(Math.max(0, depth));
   }
 }

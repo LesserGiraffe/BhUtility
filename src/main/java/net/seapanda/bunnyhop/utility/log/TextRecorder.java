@@ -116,8 +116,6 @@ public class TextRecorder implements Closeable {
 
   /**
    * ファイルをローテンションするため, ファイルをリネームする.
-   *
-   * @return リネームに成功した場合true
    */
   private void renameLogFiles() throws IOException {
     Path oldestLogFilePath = genLogFilePath(maxFiles - 1);
@@ -135,8 +133,8 @@ public class TextRecorder implements Closeable {
 
   private Path genLogFilePath(int fileNo) {
     String numStr = ("0000" + fileNo);
-    numStr = numStr.substring(numStr.length() - 4, numStr.length());
-    String fileName = "%s-%s.log".formatted(this.fileName, numStr, ".log");
+    numStr = numStr.substring(numStr.length() - 4);
+    String fileName = "%s-%s.log".formatted(this.fileName, numStr);
     return dirPath.resolve(fileName);
   }
 
