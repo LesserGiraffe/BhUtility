@@ -75,7 +75,7 @@ public class ConsumerInvoker<U> {
     /**
      * {@code fn} をこのレジストリから削除する.
      *
-     * <p>登録に使用したメソッドは問はない.
+     * <p>登録に使用したメソッドは問わない.
      *
      * @param fn 削除するメソッド
      */
