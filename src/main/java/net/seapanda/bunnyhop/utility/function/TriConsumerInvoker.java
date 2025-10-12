@@ -16,19 +16,12 @@
 
 package net.seapanda.bunnyhop.utility.function;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.SequencedCollection;
-
 /**
- * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を規定したクラス.
  *
  * @author K.Koike
  */
-public class TriConsumerInvoker<U, V, W> {
-
-  private final Registry registry = new Registry();
+public abstract class TriConsumerInvoker<U, V, W> {
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -37,42 +30,26 @@ public class TriConsumerInvoker<U, V, W> {
    * @param v コールバック関数に与える第二引数
    * @param w コールバック関数に与える第三引数
    */
-  public void invoke(U u, V v, W w) {
-    registry.first.accept(u, v, w);
-    for (var fn : new ArrayList<>(registry.funcs)) {
-      fn.accept(u, v, w);
-    }
-    registry.last.accept(u, v, w);
-  }
+  public abstract void invoke(U u, V v, W w);
 
   /**
    * このオブジェクトに対しコールバック関数を登録および削除するためのオブジェクトを返す.
    *
    * @return コールバック関数の登録 / 削除用オブジェクト
    */
-  public Registry getRegistry() {
-    return registry;
-  }
+  public abstract Registry getRegistry();
 
   /**
    * {@link TriConsumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry {
-
-    private TriConsumer<? super U, ? super V, ? super W> first = (u, v, w) -> {};
-    private TriConsumer<? super U, ? super V, ? super W> last = (u, v, w) -> {};
-    private final SequencedCollection<TriConsumer<? super U, ? super V, ? super W>> funcs =
-        new ArrayList<>();
+  public abstract class Registry {
 
     /**
      * {@code fn} をこのレジストリに登録する.
      *
      * @param fn レジストリに登録するメソッド
      */
-    public void add(TriConsumer<? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      funcs.addLast(fn);
-    }
+    public abstract void add(TriConsumer<? super U, ? super V, ? super W> fn);
 
     /**
      * {@code fn} をこのレジストリから削除する.
@@ -81,29 +58,17 @@ public class TriConsumerInvoker<U, V, W> {
      *
      * @param fn 削除するメソッド
      */
-    public void remove(Object fn) {
-      Objects.requireNonNull(fn);
-      if (fn == first) {
-        first = (u, v, w) -> {};
-      }
-      if (fn == last) {
-        last = (u, v, w) -> {};
-      }
-      funcs.removeAll(List.of(fn));
-    }
+    public abstract void remove(Object fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
-     * 
+     *
      * <p>このメソッドで登録したコールバック関数 ({@code fn}) は, {@link TriConsumerInvoker} により最初に呼び出されることが保証される.<br>
      * 既にこのメソッドで登録されたコールバック関数がある場合, 最初に呼び出されるコールバック関数は新しいものに置き換わる.
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setFirst(TriConsumer<? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      first = fn;
-    }
+    public abstract void setFirst(TriConsumer<? super U, ? super V, ? super W> fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
@@ -113,9 +78,6 @@ public class TriConsumerInvoker<U, V, W> {
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setLast(TriConsumer<? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      last = fn;
-    }
+    public abstract void setLast(TriConsumer<? super U, ? super V, ? super W> fn);
   }
 }

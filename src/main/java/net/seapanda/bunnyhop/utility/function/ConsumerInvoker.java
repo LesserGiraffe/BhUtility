@@ -16,61 +16,41 @@
 
 package net.seapanda.bunnyhop.utility.function;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.SequencedCollection;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * {@link Consumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link BiConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を規定したクラス.
  *
  * @author K.Koike
  */
-public class ConsumerInvoker<U> {
-
-  private final Registry registry = new Registry();
+public abstract class ConsumerInvoker<U> {
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
    *
    * @param u コールバック関数に与える引数
    */
-  public void invoke(U u) {
-    registry.first.accept(u);
-    for (var fn : new ArrayList<>(registry.funcs)) {
-      fn.accept(u);
-    }
-    registry.last.accept(u);
-  }
+  public abstract void invoke(U u);
 
   /**
    * このオブジェクトに対しコールバック関数を登録および削除するためのオブジェクトを返す.
    *
    * @return コールバック関数の登録 / 削除用オブジェクト
    */
-  public Registry getRegistry() {
-    return registry;
-  }
+  public abstract Registry getRegistry();
 
   /**
    * {@link Consumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry {
-
-    private Consumer<? super U> first = u -> {};
-    private Consumer<? super U> last = u -> {};
-    private final SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
+  public abstract class Registry {
 
     /**
      * {@code fn} をこのレジストリに登録する.
      *
      * @param fn レジストリに登録するメソッド
      */
-    public void add(Consumer<? super U> fn) {
-      Objects.requireNonNull(fn);
-      funcs.addLast(fn);
-    }
+    public abstract void add(Consumer<? super U> fn);
 
     /**
      * {@code fn} をこのレジストリから削除する.
@@ -79,29 +59,17 @@ public class ConsumerInvoker<U> {
      *
      * @param fn 削除するメソッド
      */
-    public void remove(Object fn) {
-      Objects.requireNonNull(fn);
-      if (fn == first) {
-        first = u -> {};
-      }
-      if (fn == last) {
-        last = u -> {};
-      }
-      funcs.removeAll(List.of(fn));
-    }
+    public abstract void remove(Object fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
-     * 
+     *
      * <p>このメソッドで登録したコールバック関数 ({@code fn}) は, {@link ConsumerInvoker} により最初に呼び出されることが保証される.<br>
      * 既にこのメソッドで登録されたコールバック関数がある場合, 最初に呼び出されるコールバック関数は新しいものに置き換わる.
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setFirst(Consumer<? super U> fn) {
-      Objects.requireNonNull(fn);
-      first = fn;
-    }
+    public abstract void setFirst(Consumer<? super U> fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
@@ -111,9 +79,6 @@ public class ConsumerInvoker<U> {
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setLast(Consumer<? super U> fn) {
-      Objects.requireNonNull(fn);
-      last = fn;
-    }
+    public abstract void setLast(Consumer<? super U> fn);
   }
 }

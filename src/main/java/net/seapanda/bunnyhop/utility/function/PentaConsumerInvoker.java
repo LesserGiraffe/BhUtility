@@ -17,18 +17,14 @@
 package net.seapanda.bunnyhop.utility.function;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.SequencedCollection;
 
 /**
- * {@link PentaConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link PentaConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を規定したクラス.
  *
  * @author K.Koike
  */
-public class PentaConsumerInvoker<S, T, U, V, W> {
-
-  private final Registry registry = new Registry();
+public abstract class PentaConsumerInvoker<S, T, U, V, W> {
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
@@ -39,27 +35,19 @@ public class PentaConsumerInvoker<S, T, U, V, W> {
    * @param v コールバック関数に与える第四引数
    * @param w コールバック関数に与える第五引数
    */
-  public void invoke(S s, T t, U u, V v, W w) {
-    registry.first.accept(s, t, u, v, w);
-    for (var fn : new ArrayList<>(registry.funcs)) {
-      fn.accept(s, t, u, v, w);
-    }
-    registry.last.accept(s, t, u, v, w);
-  }
+  public abstract void invoke(S s, T t, U u, V v, W w);
 
   /**
    * このオブジェクトに対しコールバック関数を登録および削除するためのオブジェクトを返す.
    *
    * @return コールバック関数の登録 / 削除用オブジェクト
    */
-  public Registry getRegistry() {
-    return registry;
-  }
+  public abstract Registry getRegistry();
 
   /**
    * {@link PentaConsumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry {
+  public abstract class Registry {
 
     private PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> first =
         (s, t, u, v, w) -> {};
@@ -73,10 +61,8 @@ public class PentaConsumerInvoker<S, T, U, V, W> {
      *
      * @param fn レジストリに登録するメソッド
      */
-    public void add(PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      funcs.addLast(fn);
-    }
+    public abstract void add(
+        PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn);
 
     /**
      * {@code fn} をこのレジストリから削除する.
@@ -85,29 +71,18 @@ public class PentaConsumerInvoker<S, T, U, V, W> {
      *
      * @param fn 削除するメソッド
      */
-    public void remove(Object fn) {
-      Objects.requireNonNull(fn);
-      if (fn == first) {
-        first = (s, t, u, v, w) -> {};
-      }
-      if (fn == last) {
-        last = (s, t, u, v, w) -> {};
-      }
-      funcs.removeAll(List.of(fn));
-    }
+    public abstract void remove(Object fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
-     * 
+     *
      * <p>このメソッドで登録したコールバック関数 ({@code fn}) は, {@link PentaConsumerInvoker} により最初に呼び出されることが保証される.<br>
      * 既にこのメソッドで登録されたコールバック関数がある場合, 最初に呼び出されるコールバック関数は新しいものに置き換わる.
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setFirst(PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      first = fn;
-    }
+    public abstract void setFirst(
+        PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
@@ -117,9 +92,7 @@ public class PentaConsumerInvoker<S, T, U, V, W> {
      *
      * @param fn レジストリに追加するメソッド
      */
-    public void setLast(PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn) {
-      Objects.requireNonNull(fn);
-      last = fn;
-    }
+    public abstract void setLast(
+        PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> fn);
   }
 }
