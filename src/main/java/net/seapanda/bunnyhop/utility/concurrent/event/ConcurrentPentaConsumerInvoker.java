@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.concurrent.function;
+package net.seapanda.bunnyhop.utility.concurrent.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
+import net.seapanda.bunnyhop.utility.event.PentaConsumerInvoker;
 import net.seapanda.bunnyhop.utility.function.PentaConsumer;
-import net.seapanda.bunnyhop.utility.function.PentaConsumerInvoker;
 
 /**
  * {@link PentaConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス. <br></>

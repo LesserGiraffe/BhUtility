@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.concurrent.function;
+package net.seapanda.bunnyhop.utility.concurrent.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
-import java.util.function.BiConsumer;
-import net.seapanda.bunnyhop.utility.function.BiConsumerInvoker;
+import java.util.function.Consumer;
+import net.seapanda.bunnyhop.utility.event.ConsumerInvoker;
 
 /**
- * {@link BiConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link Consumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス. <br>
  * スレッドセーフであることを保証する.
  *
  * @author K.Koike
  */
-public class ConcurrentBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
+public class ConcurrentConsumerInvoker<U> extends ConsumerInvoker<U> {
 
   private final Registry registry = new Registry();
 
   @Override
-  public synchronized void invoke(U u, V v) {
-    registry.getFirst().accept(u, v);
-    registry.getFuncs().forEach(fn -> fn.accept(u, v));
-    registry.getLast().accept(u, v);
+  public synchronized void invoke(U u) {
+    // コールバック内で登録した後続のコールバックを呼び出せるようにする.
+    registry.getFirst().accept(u);
+    registry.getFuncs().forEach(fn -> fn.accept(u));
+    registry.getLast().accept(u);
   }
 
   @Override
@@ -46,16 +47,16 @@ public class ConcurrentBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
   }
 
   /**
-   * {@link BiConsumer} 型のコールバック関数を格納するレジストリ.
+   * {@link Consumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry extends BiConsumerInvoker<U, V>.Registry {
+  public class Registry extends ConsumerInvoker<U>.Registry {
 
-    private BiConsumer<? super U, ? super V> first = (u, v) -> {};
-    private BiConsumer<? super U, ? super V> last = (u, v) -> {};
-    private final SequencedCollection<BiConsumer<? super U, ? super V>> funcs = new ArrayList<>();
+    private Consumer<? super U> first = u -> {};
+    private Consumer<? super U> last = u -> {};
+    private final SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
 
     @Override
-    public synchronized void add(BiConsumer<? super U, ? super V> fn) {
+    public synchronized void add(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       funcs.addLast(fn);
     }
@@ -64,37 +65,36 @@ public class ConcurrentBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
     public synchronized void remove(Object fn) {
       Objects.requireNonNull(fn);
       if (fn == first) {
-        first = (u, v) -> {};
+        first = u -> {};
       }
       if (fn == last) {
-        last = (u, v) -> {};
+        last = u -> {};
       }
       funcs.removeAll(List.of(fn));
     }
 
     @Override
-    public synchronized void setFirst(BiConsumer<? super U, ? super V> fn) {
+    public synchronized void setFirst(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       first = fn;
     }
 
     @Override
-    public synchronized void setLast(BiConsumer<? super U, ? super V> fn) {
+    public synchronized void setLast(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       last = fn;
     }
 
-    private synchronized BiConsumer<? super U, ? super V> getFirst() {
+    private synchronized Consumer<? super U> getFirst() {
       return first;
     }
 
-    private synchronized BiConsumer<? super U, ? super V> getLast() {
+    private synchronized Consumer<? super U> getLast() {
       return last;
     }
 
-    private synchronized SequencedCollection<BiConsumer<? super U, ? super V>> getFuncs() {
+    private synchronized SequencedCollection<Consumer<? super U>> getFuncs() {
       return new ArrayList<>(funcs);
     }
   }
-
 }

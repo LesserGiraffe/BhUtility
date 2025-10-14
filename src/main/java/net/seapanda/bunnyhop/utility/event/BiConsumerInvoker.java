@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.function;
+package net.seapanda.bunnyhop.utility.event;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * {@link BiConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を規定したクラス.
  *
  * @author K.Koike
  */
-public abstract class ConsumerInvoker<U> {
+public abstract class BiConsumerInvoker<U, V> {
 
   /**
    * このオブジェクトに登録されたコールバック関数を呼び出す.
    *
-   * @param u コールバック関数に与える引数
+   * @param u コールバック関数に与える第一引数
+   * @param v コールバック関数に与える第二引数
    */
-  public abstract void invoke(U u);
+  public abstract void invoke(U u, V v);
 
   /**
    * このオブジェクトに対しコールバック関数を登録および削除するためのオブジェクトを返す.
@@ -41,7 +41,7 @@ public abstract class ConsumerInvoker<U> {
   public abstract Registry getRegistry();
 
   /**
-   * {@link Consumer} 型のコールバック関数を格納するレジストリ.
+   * {@link BiConsumer} 型のコールバック関数を格納するレジストリ.
    */
   public abstract class Registry {
 
@@ -50,12 +50,12 @@ public abstract class ConsumerInvoker<U> {
      *
      * @param fn レジストリに登録するメソッド
      */
-    public abstract void add(Consumer<? super U> fn);
+    public abstract void add(BiConsumer<? super U, ? super V> fn);
 
     /**
      * {@code fn} をこのレジストリから削除する.
      *
-     * <p>登録に使用したメソッドは問わない.
+     * <p>登録に使用したメソッドは問はない.
      *
      * @param fn 削除するメソッド
      */
@@ -64,21 +64,21 @@ public abstract class ConsumerInvoker<U> {
     /**
      * {@code fn} をこのレジストリに登録する.
      *
-     * <p>このメソッドで登録したコールバック関数 ({@code fn}) は, {@link ConsumerInvoker} により最初に呼び出されることが保証される.<br>
+     * <p>このメソッドで登録したコールバック関数 ({@code fn}) は, {@link BiConsumerInvoker} により最初に呼び出されることが保証される.<br>
      * 既にこのメソッドで登録されたコールバック関数がある場合, 最初に呼び出されるコールバック関数は新しいものに置き換わる.
      *
      * @param fn レジストリに追加するメソッド
      */
-    public abstract void setFirst(Consumer<? super U> fn);
+    public abstract void setFirst(BiConsumer<? super U, ? super V> fn);
 
     /**
      * {@code fn} をこのレジストリに登録する.
      *
-     * <p>このメソッドで登録したメソッド ({@code fn}) は, {@link ConsumerInvoker} により最後に呼び出されることが保証される.<br>
+     * <p>このメソッドで登録したメソッド ({@code fn}) は, {@link BiConsumerInvoker} により最後に呼び出されることが保証される.<br>
      * 既にこのメソッドで登録されたコールバック関数がある場合, 最後に呼び出されるコールバック関数は新しいものに置き換わる.
      *
      * @param fn レジストリに追加するメソッド
      */
-    public abstract void setLast(Consumer<? super U> fn);
+    public abstract void setLast(BiConsumer<? super U, ? super V> fn);
   }
 }

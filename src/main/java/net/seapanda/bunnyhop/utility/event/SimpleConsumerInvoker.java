@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.function;
+package net.seapanda.bunnyhop.utility.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
+import java.util.function.Consumer;
 
 /**
- * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link Consumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
  *
  * @author K.Koike
  */
-public class SimpleTriConsumerInvoker<U, V, W> extends TriConsumerInvoker<U, V, W> {
+public class SimpleConsumerInvoker<U> extends ConsumerInvoker<U> {
 
   private final Registry registry = new Registry();
 
   @Override
-  public void invoke(U u, V v, W w) {
-    registry.first.accept(u, v, w);
-    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u, v, w));
-    registry.last.accept(u, v, w);
+  public void invoke(U u) {
+    // コールバック内で登録した後続のコールバックを呼び出せるようにする.
+    registry.first.accept(u);
+    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u));
+    registry.last.accept(u);
   }
 
   @Override
@@ -43,17 +45,16 @@ public class SimpleTriConsumerInvoker<U, V, W> extends TriConsumerInvoker<U, V, 
   }
 
   /**
-   * {@link TriConsumer} 型のコールバック関数を格納するレジストリ.
+   * {@link Consumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry extends TriConsumerInvoker<U, V, W>.Registry {
+  public class Registry extends ConsumerInvoker<U>.Registry {
 
-    private TriConsumer<? super U, ? super V, ? super W> first = (u, v, w) -> {};
-    private TriConsumer<? super U, ? super V, ? super W> last = (u, v, w) -> {};
-    private final SequencedCollection<TriConsumer<? super U, ? super V, ? super W>> funcs =
-        new ArrayList<>();
+    private Consumer<? super U> first = u -> {};
+    private Consumer<? super U> last = u -> {};
+    private final SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
 
     @Override
-    public void add(TriConsumer<? super U, ? super V, ? super W> fn) {
+    public void add(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       funcs.addLast(fn);
     }
@@ -62,22 +63,22 @@ public class SimpleTriConsumerInvoker<U, V, W> extends TriConsumerInvoker<U, V, 
     public void remove(Object fn) {
       Objects.requireNonNull(fn);
       if (fn == first) {
-        first = (u, v, w) -> {};
+        first = u -> {};
       }
       if (fn == last) {
-        last = (u, v, w) -> {};
+        last = u -> {};
       }
       funcs.removeAll(List.of(fn));
     }
 
     @Override
-    public void setFirst(TriConsumer<? super U, ? super V, ? super W> fn) {
+    public void setFirst(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       first = fn;
     }
 
     @Override
-    public void setLast(TriConsumer<? super U, ? super V, ? super W> fn) {
+    public void setLast(Consumer<? super U> fn) {
       Objects.requireNonNull(fn);
       last = fn;
     }

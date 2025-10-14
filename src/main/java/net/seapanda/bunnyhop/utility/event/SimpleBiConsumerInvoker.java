@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.function;
+package net.seapanda.bunnyhop.utility.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
- * {@link Consumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link BiConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
  *
  * @author K.Koike
  */
-public class SimpleConsumerInvoker<U> extends ConsumerInvoker<U> {
+public class SimpleBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
 
   private final Registry registry = new Registry();
 
   @Override
-  public void invoke(U u) {
-    // コールバック内で登録した後続のコールバックを呼び出せるようにする.
-    registry.first.accept(u);
-    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u));
-    registry.last.accept(u);
+  public void invoke(U u, V v) {
+    registry.first.accept(u, v);
+    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u, v));
+    registry.last.accept(u, v);
   }
 
   @Override
@@ -45,16 +44,16 @@ public class SimpleConsumerInvoker<U> extends ConsumerInvoker<U> {
   }
 
   /**
-   * {@link Consumer} 型のコールバック関数を格納するレジストリ.
+   * {@link BiConsumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry extends ConsumerInvoker<U>.Registry {
+  public class Registry extends BiConsumerInvoker<U, V>.Registry {
 
-    private Consumer<? super U> first = u -> {};
-    private Consumer<? super U> last = u -> {};
-    private final SequencedCollection<Consumer<? super U>> funcs = new ArrayList<>();
+    private BiConsumer<? super U, ? super V> first = (u, v) -> {};
+    private BiConsumer<? super U, ? super V> last = (u, v) -> {};
+    private final SequencedCollection<BiConsumer<? super U, ? super V>> funcs = new ArrayList<>();
 
     @Override
-    public void add(Consumer<? super U> fn) {
+    public void add(BiConsumer<? super U, ? super V> fn) {
       Objects.requireNonNull(fn);
       funcs.addLast(fn);
     }
@@ -63,22 +62,22 @@ public class SimpleConsumerInvoker<U> extends ConsumerInvoker<U> {
     public void remove(Object fn) {
       Objects.requireNonNull(fn);
       if (fn == first) {
-        first = u -> {};
+        first = (u, v) -> {};
       }
       if (fn == last) {
-        last = u -> {};
+        last = (u, v) -> {};
       }
       funcs.removeAll(List.of(fn));
     }
 
     @Override
-    public void setFirst(Consumer<? super U> fn) {
+    public void setFirst(BiConsumer<? super U, ? super V> fn) {
       Objects.requireNonNull(fn);
       first = fn;
     }
 
     @Override
-    public void setLast(Consumer<? super U> fn) {
+    public void setLast(BiConsumer<? super U, ? super V> fn) {
       Objects.requireNonNull(fn);
       last = fn;
     }

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.function;
+package net.seapanda.bunnyhop.utility.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
-import java.util.function.BiConsumer;
+import net.seapanda.bunnyhop.utility.function.TriConsumer;
 
 /**
- * {@link BiConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
+ * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
  *
  * @author K.Koike
  */
-public class SimpleBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
+public class SimpleTriConsumerInvoker<U, V, W> extends TriConsumerInvoker<U, V, W> {
 
   private final Registry registry = new Registry();
 
   @Override
-  public void invoke(U u, V v) {
-    registry.first.accept(u, v);
-    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u, v));
-    registry.last.accept(u, v);
+  public void invoke(U u, V v, W w) {
+    registry.first.accept(u, v, w);
+    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u, v, w));
+    registry.last.accept(u, v, w);
   }
 
   @Override
@@ -44,16 +44,17 @@ public class SimpleBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
   }
 
   /**
-   * {@link BiConsumer} 型のコールバック関数を格納するレジストリ.
+   * {@link TriConsumer} 型のコールバック関数を格納するレジストリ.
    */
-  public class Registry extends BiConsumerInvoker<U, V>.Registry {
+  public class Registry extends TriConsumerInvoker<U, V, W>.Registry {
 
-    private BiConsumer<? super U, ? super V> first = (u, v) -> {};
-    private BiConsumer<? super U, ? super V> last = (u, v) -> {};
-    private final SequencedCollection<BiConsumer<? super U, ? super V>> funcs = new ArrayList<>();
+    private TriConsumer<? super U, ? super V, ? super W> first = (u, v, w) -> {};
+    private TriConsumer<? super U, ? super V, ? super W> last = (u, v, w) -> {};
+    private final SequencedCollection<TriConsumer<? super U, ? super V, ? super W>> funcs =
+        new ArrayList<>();
 
     @Override
-    public void add(BiConsumer<? super U, ? super V> fn) {
+    public void add(TriConsumer<? super U, ? super V, ? super W> fn) {
       Objects.requireNonNull(fn);
       funcs.addLast(fn);
     }
@@ -62,22 +63,22 @@ public class SimpleBiConsumerInvoker<U, V> extends BiConsumerInvoker<U, V> {
     public void remove(Object fn) {
       Objects.requireNonNull(fn);
       if (fn == first) {
-        first = (u, v) -> {};
+        first = (u, v, w) -> {};
       }
       if (fn == last) {
-        last = (u, v) -> {};
+        last = (u, v, w) -> {};
       }
       funcs.removeAll(List.of(fn));
     }
 
     @Override
-    public void setFirst(BiConsumer<? super U, ? super V> fn) {
+    public void setFirst(TriConsumer<? super U, ? super V, ? super W> fn) {
       Objects.requireNonNull(fn);
       first = fn;
     }
 
     @Override
-    public void setLast(BiConsumer<? super U, ? super V> fn) {
+    public void setLast(TriConsumer<? super U, ? super V, ? super W> fn) {
       Objects.requireNonNull(fn);
       last = fn;
     }

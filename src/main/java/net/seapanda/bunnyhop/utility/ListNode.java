@@ -21,22 +21,22 @@ package net.seapanda.bunnyhop.utility;
  *
  * @author K.Koike
  */
-public class LinkNode<T> {
+public class ListNode<T> {
 
   /** 次のノード. */
-  protected LinkNode<T> next;
+  protected ListNode<T> next;
   /** 前のノード. */
-  protected LinkNode<T> prev;
+  protected ListNode<T> prev;
   /** ノードの保持するもの. */
   protected T container;
 
   /** コンストラクタ. */
-  public LinkNode(T container) {
+  public ListNode(T container) {
     this.container = container;
   }
 
   /** コンストラクタ. */
-  public LinkNode() {}
+  public ListNode() {}
 
   /** 次のノードを返す. */
   public T getNext() {
@@ -61,7 +61,7 @@ public class LinkNode<T> {
    *
    * @param newNode 呼び出し元の次のノードとして繋ぐノード
    */
-  public void connectToNext(LinkNode<T> newNode) {
+  public void connectToNext(ListNode<T> newNode) {
     if (next != null) {
       next.prev = newNode;
     }
@@ -75,7 +75,7 @@ public class LinkNode<T> {
    *
    * @param newNode 呼び出し元の前のノードとして繋ぐノード
    */
-  public void connectToPrev(LinkNode<T> newNode) {
+  public void connectToPrev(ListNode<T> newNode) {
     if (prev != null) {
       prev.next = newNode;
     }

@@ -140,8 +140,8 @@ public class JsonTextDatabase implements TextDatabase {
       String objsStr = Stream.of(objs)
           .map(Object::toString)
           .reduce("", "%s, %s"::formatted);
-      System.err.println(String.format(
-          "Failed to generate a text.  id = %s, objs = %s\n%s".formatted(pathStr, objsStr, e)));
+      System.err.printf(
+          "Failed to generate a text.  id = %s, objs = %s\n%s%n", pathStr, objsStr, e);
       return "";
     }
   }

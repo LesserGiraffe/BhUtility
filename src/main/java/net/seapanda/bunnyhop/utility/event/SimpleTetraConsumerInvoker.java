@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.function;
+package net.seapanda.bunnyhop.utility.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
+import net.seapanda.bunnyhop.utility.function.TetraConsumer;
 
 /**
  * {@link TetraConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.

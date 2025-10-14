@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility.concurrent.function;
+package net.seapanda.bunnyhop.utility.concurrent.event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SequencedCollection;
+import net.seapanda.bunnyhop.utility.event.TriConsumerInvoker;
 import net.seapanda.bunnyhop.utility.function.TriConsumer;
-import net.seapanda.bunnyhop.utility.function.TriConsumerInvoker;
 
 /**
  * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
