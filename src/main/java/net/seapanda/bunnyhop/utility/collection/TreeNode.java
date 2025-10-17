@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.utility;
+package net.seapanda.bunnyhop.utility.collection;
 
 import java.util.ArrayList;
 import java.util.List;
