@@ -34,7 +34,7 @@ public final class AppVersion extends Version {
    * @return {@link AppVersion} オブジェクト
    */
   public static AppVersion of(String id) {
-    return new AppVersion(id == null ? "" : id);
+    return new AppVersion(id);
   }
 
   /**
@@ -48,6 +48,6 @@ public final class AppVersion extends Version {
 
   /** デフォルトコンストラクタ. (デシリアライズ用) */
   public AppVersion() {
-    super("");
+    super();
   }
 }

@@ -28,11 +28,22 @@ import java.util.regex.Pattern;
  */
 public abstract class Version implements Serializable {
 
+  private static final Pattern pattern =
+      Pattern.compile("([a-zA-Z0-9]+)-([1-9]\\d*|0)\\.([1-9]\\d*|0)\\.([1-9]\\d*|0)");
+
   public final String version;
   public final String prefix;
-  public final String major;
-  public final String minor;
-  public final String patch;
+  public final int major;
+  public final int minor;
+  public final int patch;
+
+  protected Version() {
+    version = "";
+    prefix = "";
+    major = Integer.MIN_VALUE;
+    minor = Integer.MIN_VALUE;
+    patch = Integer.MIN_VALUE;
+  }
 
   /**
    * コンストラクタ.
@@ -40,55 +51,70 @@ public abstract class Version implements Serializable {
    * @param version 識別子名 (例 : bh-2.1.6)
    */
   protected Version(String version) {
-    this.version = version;
-    if (version.isEmpty()) {
-      prefix = "";
-      major = "";
-      minor = "";
-      patch = "";
-      return;
+    if (version == null) {
+      throw new IllegalArgumentException("Invalid BunnyHop version format (null)");
     }
-    Matcher matcher =
-        Pattern.compile("([a-zA-Z0-9]+)-(\\d+)\\.(\\d+)\\.(\\d+)").matcher(version);
-    if (version == null || !matcher.find()) {
+    Matcher matcher = pattern.matcher(version);
+    if (!matcher.find()) {
       throw new IllegalArgumentException("Invalid BunnyHop version format (%s)".formatted(version));
     }
+    this.version = version;
     prefix = matcher.group(1);
-    major = matcher.group(2);
-    minor = matcher.group(3);
-    patch = matcher.group(4);
+    major = Integer.parseInt(matcher.group(2));
+    minor = Integer.parseInt(matcher.group(3));
+    patch = Integer.parseInt(matcher.group(4));
   }
 
-  /** 接頭語部分を比較する. */
-  public boolean comparePrefix(Version other) {
-    if (other == null || getClass() != other.getClass()) {
-      return false;
+  /**
+   * 接頭語部分を比較する.
+   *
+   * @return このバージョンの接頭語が指定されたバージョンの接頭語より小さい場合は負の整数,
+   *         等しい場合はゼロ, 大きい場合は正の整数.
+   */
+  public int comparePrefix(Version other) {
+    if (other == null) {
+      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
     }
-    return other.prefix.equals(prefix);
+    return prefix.compareTo(other.prefix);
   }
 
-  /** メジャー番号を比較する. */
-  public boolean compareMajor(Version other) {
-    if (other == null || getClass() != other.getClass()) {
-      return false;
+  /**
+   * メジャー番号を比較する.
+   *
+   * @return このバージョンのメジャー番号が指定されたバージョンのメジャー番号より小さい場合は負の整数,
+   *         等しい場合はゼロ, 大きい場合は正の整数.
+   */
+  public int compareMajor(Version other) {
+    if (other == null) {
+      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
     }
-    return other.major.equals(major);
+    return Integer.compare(major, other.major);
   }
 
-  /** マイナー番号を比較する. */
-  public boolean compareMinor(Version other) {
-    if (other == null || getClass() != other.getClass()) {
-      return false;
+  /**
+   * マイナー番号を比較する.
+   *
+   * @return このバージョンのマイナー番号が指定されたバージョンのマイナー番号より小さい場合は負の整数,
+   *         等しい場合はゼロ, 大きい場合は正の整数.
+   */
+  public int compareMinor(Version other) {
+    if (other == null) {
+      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
     }
-    return other.minor.equals(minor);
+    return Integer.compare(minor, other.minor);
   }
 
-  /** パッチ番号を比較する. */
-  public boolean comparePatch(Version other) {
-    if (other == null || getClass() != other.getClass()) {
-      return false;
+  /**
+   * パッチ番号を比較する.
+   *
+   * @return このバージョンのパッチ番号が指定されたバージョンのパッチ番号より小さい場合は負の整数,
+   *         等しい場合はゼロ, 大きい場合は正の整数.
+   */
+  public int comparePatch(Version other) {
+    if (other == null) {
+      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
     }
-    return other.patch.equals(patch);
+    return Integer.compare(patch, other.patch);
   }
 
   @Override
