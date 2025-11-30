@@ -108,75 +108,31 @@ public final class SynchronizingTimer {
   }
 
   /**
-   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
-   * スレッドが中断された場合は即座に制御を返す.
-   */
-  public void countdownAndAwait() {
-    try {
-      countdownAndAwaitInterruptibly();
-    } catch (InterruptedException e) { /* do nothing */ }
-  }
-
-  /**
-   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
-   * スレッドが中断された場合は即座に制御を返す.
-   *
-   * @param timeout 最大待ち時間
-   * @param unit 待ち時間の単位
-   */
-  public void countdownAndAwait(long timeout, TimeUnit unit) {
-    try {
-      countdownAndAwaitInterruptibly(timeout, unit);
-    } catch (InterruptedException | TimeoutException e) { /* do nothing */ }
-  }
-
-  /**
    * タイマーのカウントが 0 になるまで待つ.
    * スレッドが中断された場合は即座に制御を返す.
    */
   public void await() {
     try {
       awaitInterruptibly();
-    } catch (InterruptedException e) { /* do nothing */ }
+    } catch (InterruptedException e) { /* Do nothing. */ }
   }
 
   /**
    * タイマーのカウントが 0 になるまで {@code timeout} で指定した時間待つ.
-   * スレッドが中断された場合は即座に制御を返す.
+   *
+   * <p>スレッドが中断された場合は即座に制御を返す.
+   * この場合戻り値は false となる.
    *
    * @param timeout 最大待ち時間
    * @param unit 待ち時間の単位
+   * @return タイマーのカウントが 0 に達した場合 true を返す
    */
-  public void await(long timeout, TimeUnit unit) throws TimeoutException {
+  public boolean await(long timeout, TimeUnit unit) {
     try {
-      awaitInterruptibly(timeout, unit);
-    } catch (InterruptedException e) { /* do nothing */ }
-  }
-
-  /** タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ. */
-  public void countdownAndAwaitInterruptibly() throws InterruptedException {
-    try {
-      PhaserStatus status = deregister();
-      if (status.numParties() == 0) {
-        return;
-      }
-      phaser.awaitAdvanceInterruptibly(status.phase());
-    } catch (InterruptedException e) { /* do nothing */ }
-  }
-
-  /**
-   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
-   *
-   * @param timeout 最大待ち時間
-   * @param unit 待ち時間の単位
-   */
-  public void countdownAndAwaitInterruptibly(long timeout, TimeUnit unit)
-      throws InterruptedException, TimeoutException {
-    PhaserStatus status = deregister();
-    if (status.numParties() == 0) {
-      return;
+      return awaitInterruptibly(timeout, unit);
+    } catch (InterruptedException e) {
+      return false;
     }
-    phaser.awaitAdvanceInterruptibly(status.phase(), timeout, unit);
   }
 
   /** タイマーのカウントが 0 になるまで待つ. */
@@ -195,14 +151,75 @@ public final class SynchronizingTimer {
    *
    * @param timeout 最大待ち時間
    * @param unit 待ち時間の単位
+   * @return タイマーのカウントが 0 に達した場合 true を返す
    */
-  public void awaitInterruptibly(long timeout, TimeUnit unit)
-      throws InterruptedException, TimeoutException {
+  public boolean awaitInterruptibly(long timeout, TimeUnit unit) throws InterruptedException {
     PhaserStatus status = getPhaserStatus();
+    if (status.numParties() == 0) {
+      return true;
+    }
+    try {
+      phaser.awaitAdvanceInterruptibly(status.phase, timeout, unit);
+    } catch (TimeoutException e) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
+   * スレッドが中断された場合は即座に制御を返す.
+   */
+  public void countdownAndAwait() {
+    try {
+      countdownAndAwaitInterruptibly();
+    } catch (InterruptedException e) { /* Do nothing. */ }
+  }
+
+  /**
+   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
+   * スレッドが中断された場合は即座に制御を返す.
+   *
+   * @param timeout 最大待ち時間
+   * @param unit 待ち時間の単位
+   * @return タイマーのカウントが 0 に達した場合 true を返す
+   */
+  public boolean countdownAndAwait(long timeout, TimeUnit unit) {
+    try {
+      return countdownAndAwaitInterruptibly(timeout, unit);
+    } catch (InterruptedException e) {
+      return false;
+    }
+  }
+
+  /** タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ. */
+  public void countdownAndAwaitInterruptibly() throws InterruptedException {
+    PhaserStatus status = deregister();
     if (status.numParties() == 0) {
       return;
     }
-    phaser.awaitAdvanceInterruptibly(status.phase, timeout, unit);
+    phaser.awaitAdvanceInterruptibly(status.phase());
+  }
+
+  /**
+   * タイマーのカウントを 1 減らしてから, カウントが 0 になるまで待つ.
+   *
+   * @param timeout 最大待ち時間
+   * @param unit 待ち時間の単位
+   * @return タイマーのカウントが 0 に達した場合 true を返す
+   */
+  public boolean countdownAndAwaitInterruptibly(long timeout, TimeUnit unit)
+      throws InterruptedException {
+    PhaserStatus status = deregister();
+    if (status.numParties() == 0) {
+      return false;
+    }
+    try {
+      phaser.awaitAdvanceInterruptibly(status.phase(), timeout, unit);
+    } catch (TimeoutException e) {
+      return false;
+    }
+    return true;
   }
 
   /**
