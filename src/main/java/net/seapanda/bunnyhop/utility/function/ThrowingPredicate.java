@@ -16,28 +16,32 @@
 
 package net.seapanda.bunnyhop.utility.function;
 
-import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
- * 3 つの引数を受け取り, 結果を返さない操作を表す関数型インターフェース.
+ * 例外をスローする {@link Predicate} を表す関数型インターフェース.
  *
- * @param <U> 第 1 引数の型
- * @param <V> 第 2 引数の型
- * @param <W> 第 3 引数の型
+ * @param <T> 入力の型
+ * @param <E> スローする例外の型
  * @author K.Koike
  */
 @FunctionalInterface
-public interface TriConsumer<U, V, W> {
-  
-  void accept(U u, V v, W w);
+public interface ThrowingPredicate<T, E extends Throwable> extends Predicate<T> {
 
-  /** {@link #accept} を実行してから, 同じ引数で {@code after} を実行する合成関数を返す. */
-  default TriConsumer<U, V, W> andThen(
-      final TriConsumer<? super U, ? super V, ? super W> after) {
-    Objects.requireNonNull(after);
-    return (u, v, w) -> {
-      accept(u, v, w);
-      after.accept(u, v, w);
-    };
+  boolean testOrThrow(T t) throws E;
+
+  @Override
+  default boolean test(T t) {
+    try {
+      return testOrThrow(t);
+    } catch (Throwable e) {
+      Throwing.sneakyThrow(e);
+    }
+    return false;
+  }
+
+  /** {@link ThrowingPredicate} を {@link Predicate} に変換する. */
+  static <T, E extends Throwable> Predicate<T> unchecked(ThrowingPredicate<T, E> predicate) {
+    return predicate;
   }
 }

@@ -16,28 +16,33 @@
 
 package net.seapanda.bunnyhop.utility.function;
 
-import java.util.Objects;
+import java.util.function.Function;
 
 /**
- * 3 つの引数を受け取り, 結果を返さない操作を表す関数型インターフェース.
+ * 例外をスローする {@link Function} を表す関数型インターフェース.
  *
- * @param <U> 第 1 引数の型
- * @param <V> 第 2 引数の型
- * @param <W> 第 3 引数の型
+ * @param <T> 入力の型
+ * @param <R> 結果の型
+ * @param <E> スローする例外の型
  * @author K.Koike
  */
 @FunctionalInterface
-public interface TriConsumer<U, V, W> {
-  
-  void accept(U u, V v, W w);
+public interface ThrowingFunction<T, R, E extends Throwable> extends Function<T, R> {
 
-  /** {@link #accept} を実行してから, 同じ引数で {@code after} を実行する合成関数を返す. */
-  default TriConsumer<U, V, W> andThen(
-      final TriConsumer<? super U, ? super V, ? super W> after) {
-    Objects.requireNonNull(after);
-    return (u, v, w) -> {
-      accept(u, v, w);
-      after.accept(u, v, w);
-    };
+  R applyOrThrow(T t) throws E;
+
+  @Override
+  default R apply(T t) {
+    try {
+      return applyOrThrow(t);
+    } catch (Throwable e) {
+      Throwing.sneakyThrow(e);
+    }
+    return null;
+  }
+
+  /** {@link ThrowingFunction} を {@link Function} に変換する. */
+  static <T, R, E extends Throwable> Function<T, R> unchecked(ThrowingFunction<T, R, E> function) {
+    return function;
   }
 }

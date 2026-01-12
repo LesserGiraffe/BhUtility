@@ -16,30 +16,37 @@
 
 package net.seapanda.bunnyhop.utility.function;
 
-import java.util.Objects;
-
 /**
- * 5 つの引数を受け取り, 結果を返さない操作を表す関数型インターフェース.
+ * 例外をスローする {@link PentaFunction} を表す関数型インターフェース.
  *
- * @author K.Koike
  * @param <S> 第 1 引数の型
  * @param <T> 第 2 引数の型
  * @param <U> 第 3 引数の型
  * @param <V> 第 4 引数の型
  * @param <W> 第 5 引数の型
+ * @param <R> 結果の型
+ * @param <E> スローする例外の型
+ * @author K.Koike
  */
 @FunctionalInterface
-public interface PentaConsumer<S, T, U, V, W> {
-  
-  void accept(S s, T t, U u, V v, W w);
+public interface ThrowingPentaFunction<S, T, U, V, W, R, E extends Throwable>
+    extends PentaFunction<S, T, U, V, W, R> {
 
-  /** {@link #accept} を実行してから, 同じ引数で {@code after} を実行する合成関数を返す. */
-  default PentaConsumer<S, T, U, V, W> andThen(
-      PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> after) {
-    Objects.requireNonNull(after);
-    return (s, t, u, v, w) -> {
-      accept(s, t, u, v, w);
-      after.accept(s, t, u, v, w);
-    };
+  R applyOrThrow(S s, T t, U u, V v, W w) throws E;
+
+  @Override
+  default R apply(S s, T t, U u, V v, W w) {
+    try {
+      return applyOrThrow(s, t, u, v, w);
+    } catch (Throwable e) {
+      Throwing.sneakyThrow(e);
+    }
+    return null;
+  }
+
+  /** {@link ThrowingPentaFunction} を {@link PentaFunction} に変換する. */
+  static <S, T, U, V, W, R, E extends Throwable> PentaFunction<S, T, U, V, W, R> unchecked(
+      ThrowingPentaFunction<S, T, U, V, W, R, E> function) {
+    return function;
   }
 }
