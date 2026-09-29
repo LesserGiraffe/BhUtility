@@ -24,7 +24,7 @@ package net.seapanda.bunnyhop.utility;
 public class SimpleCache<T> {
   
   private T val;
-  private boolean isDirty = false;
+  private boolean isDirty;
 
   /**
    * コンストラクタ.

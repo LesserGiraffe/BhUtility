@@ -56,5 +56,5 @@ public interface TextDatabase {
    * @param path このリストで特定されるテキストデータを返す
    * @return {@code path} で特定されたテキストデータ
    */
-  public String get(String... path);
+  String get(String... path);
 }

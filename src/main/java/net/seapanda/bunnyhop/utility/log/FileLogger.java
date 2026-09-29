@@ -47,7 +47,8 @@ public class FileLogger implements Logger {
   }
 
   /** デバッグ用エラーメッセージ出力メソッド. */
-  public synchronized void error(String msg) {
+  @Override
+  public synchronized void error(String msg, Object... params) {
     if (isClosed) {
       return;
     }
@@ -55,13 +56,14 @@ public class FileLogger implements Logger {
     msg = "[ERR] : %s @ %s\n%s\n----\n".formatted(
         Utility.getMethodName(2),
         new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date),
-        msg);
+        msg.formatted(params));
     System.err.print(msg);
     recorder.write(msg);
   }
 
   /** デバッグ用メッセージ出力メソッド. */
-  public synchronized void info(String msg) {
+  @Override
+  public synchronized void info(String msg, Object... params) {
     if (isClosed) {
       return;
     }
@@ -69,7 +71,7 @@ public class FileLogger implements Logger {
     msg = "[INFO] : %s @ %s\n%s\n----\n".formatted(
         Utility.getMethodName(2),
         new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date),
-        msg);
+        msg.formatted(params));
     System.out.print(msg);
     recorder.write(msg);
   }

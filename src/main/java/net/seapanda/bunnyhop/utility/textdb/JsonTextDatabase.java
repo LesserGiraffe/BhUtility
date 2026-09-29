@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 public class JsonTextDatabase implements TextDatabase {
   
   /** テキストのデータベース. */
-  Map<TextId, String> database = new ConcurrentHashMap<>();
+  final Map<TextId, String> database = new ConcurrentHashMap<>();
 
   /**
    * {@code filePath} で指定されたファイルからテキストデータのデータベースを構築する.
@@ -54,7 +54,7 @@ public class JsonTextDatabase implements TextDatabase {
     var gson = new Gson();
     try (var jr = gson.newJsonReader(new FileReader(filePath.toString()))) {
       JsonObject jsonObj = gson.fromJson(jr, JsonObject.class);
-      createDatabase(new LinkedList<String>(), jsonObj);
+      createDatabase(new LinkedList<>(), jsonObj);
     }
   }
 
@@ -66,7 +66,7 @@ public class JsonTextDatabase implements TextDatabase {
   public JsonTextDatabase(String jsonStr) throws JsonSyntaxException {
     var gson = new Gson();
     JsonObject jsonObj = gson.fromJson(jsonStr, JsonObject.class);
-    createDatabase(new LinkedList<String>(), jsonObj);
+    createDatabase(new LinkedList<>(), jsonObj);
   }
 
   /**
@@ -106,8 +106,7 @@ public class JsonTextDatabase implements TextDatabase {
       String objsStr = Stream.of(objs)
           .map(Object::toString)
           .reduce("", "%s, %s"::formatted);
-      System.err.printf(
-          ("Failed to generate a text.  id = %s, objs = %s\n%s".formatted(id, objsStr, e)) + "%n");
+      System.err.printf("Failed to generate a text.  id = %s, objs = %s\n%s\n", id, objsStr, e);
       return "";
     }
   }
@@ -141,7 +140,7 @@ public class JsonTextDatabase implements TextDatabase {
           .map(Object::toString)
           .reduce("", "%s, %s"::formatted);
       System.err.printf(
-          "Failed to generate a text.  id = %s, objs = %s\n%s%n", pathStr, objsStr, e);
+          "Failed to generate a text.  id = %s, objs = %s\n%s\n", pathStr, objsStr, e);
       return "";
     }
   }

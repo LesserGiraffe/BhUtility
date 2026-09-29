@@ -29,7 +29,7 @@ import java.util.Objects;
 public class ImmutableCircularList<T> {
 
   /** 現在参照している要素のインデックスが不正であることを示す値. */
-  public static int INVALID_POINTER = -1;
+  public static final int INVALID_POINTER = -1;
 
   private final Object[] items;
   private int pointer = INVALID_POINTER;
@@ -204,7 +204,8 @@ public class ImmutableCircularList<T> {
    * @return 進めた後のインデックス
    */
   public int moveAhead(int step) {
-    return calcNextPointer(step);
+    pointer = calcNextPointer(step);
+    return pointer;
   }
 
   /**
@@ -214,6 +215,7 @@ public class ImmutableCircularList<T> {
    * @return 戻した後のインデックス
    */
   public int movePrevious(int step) {
-    return calcNextPointer(-(long) step);
+    pointer = calcNextPointer(-(long) step);
+    return pointer;
   }
 }

@@ -53,9 +53,9 @@ public class Utility {
     Path jarPath = Paths.get(jarFile.getAbsolutePath());
     String root = (jarPath.getRoot() == null) ? "" : jarPath.getRoot().toString();
     if (isModulePath) {
-      execPath = root + jarPath.subpath(0, jarPath.getNameCount()).toString();
+      execPath = root + jarPath.subpath(0, jarPath.getNameCount());
     } else {
-      execPath = root + jarPath.subpath(0, jarPath.getNameCount() - 2).toString();
+      execPath = root + jarPath.subpath(0, jarPath.getNameCount() - 2);
     }
     javaPath = System.getProperty("java.home") + fs + "bin" + fs + "java";
   }

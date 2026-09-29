@@ -50,9 +50,9 @@ public abstract class PentaConsumerInvoker<S, T, U, V, W> {
    */
   public abstract class Registry {
 
-    private PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> first =
+    private final PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> first =
         (s, t, u, v, w) -> {};
-    private PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> last =
+    private final PentaConsumer<? super S, ? super T, ? super U, ? super V, ? super W> last =
         (s, t, u, v, w) -> {};
     private final SequencedCollection<PentaConsumer<
         ? super S, ? super T, ? super U, ? super V, ? super W>> funcs = new ArrayList<>();

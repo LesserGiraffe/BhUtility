@@ -28,7 +28,7 @@ public interface Showable {
    *
    * @param depth 表示インデント数
    */
-  public void show(int depth);
+  void show(int depth);
 
   /** インデント分の空白文字を返す. */
   default String indent(int depth) {

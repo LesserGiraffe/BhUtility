@@ -24,8 +24,8 @@ package net.seapanda.bunnyhop.utility.log;
 public interface Logger {
   
   /** メッセージをログに出力する. */
-  void info(String msg);
+  void info(String msg, Object... params);
 
   /** メッセージをログに出力する. */
-  void error(String msg);
+  void error(String msg, Object... params);
 }

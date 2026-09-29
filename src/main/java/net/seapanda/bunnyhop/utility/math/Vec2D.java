@@ -57,7 +57,7 @@ public class Vec2D implements Serializable {
    * 引数で指定した数の方が現在の値より大きい場合, その数で置き換える.
    * 片方の要素だけ大きい場合は、その要素だけ置き換える.
    */
-  public Vec2D updateIfGreter(Vec2D v) {
+  public Vec2D updateIfGreater(Vec2D v) {
     return updateIfGreater(v.x, v.y);
   }
 
