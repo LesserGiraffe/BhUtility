@@ -23,9 +23,77 @@ package net.seapanda.bunnyhop.utility.log;
  */
 public interface Logger {
   
-  /** メッセージをログに出力する. */
+  /**
+   * 情報レベルのメッセージをログに出力する.
+   *
+   * @param msg 出力するメッセージ.  {@link String#format} の書式文字列として扱われる.
+   *            null の場合は何も出力しない.
+   * @param params {@code msg} の書式指定子に渡す引数
+   */
   void info(String msg, Object... params);
 
-  /** メッセージをログに出力する. */
+  /**
+   * 情報レベルのメッセージと例外の情報をログに出力する.
+   *
+   * @param msg 出力するメッセージ.  null の場合は何も出力しない.
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を {@code msg} の後ろに出力する.
+   *          null の場合は例外の情報を出力しない.
+   */
+  void info(String msg, Throwable e);
+
+  /**
+   * 情報レベルのメッセージと例外の情報をログに出力する.
+   *
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を {@code msg} の後ろに出力する.
+   *          null の場合は例外の情報を出力しない.
+   * @param msg 出力するメッセージ.  {@link String#format} の書式文字列として扱われる.
+   *            null の場合は何も出力しない.
+   * @param params {@code msg} の書式指定子に渡す引数
+   */
+  void info(Throwable e, String msg, Object... params);
+
+  /**
+   * 例外の情報を情報レベルのログに出力する.
+   *
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を出力する.
+   *          null の場合は何も出力しない.
+   */
+  void info(Throwable e);
+
+  /**
+   * エラーレベルのメッセージをログに出力する.
+   *
+   * @param msg 出力するメッセージ.  {@link String#format} の書式文字列として扱われる.
+   *            null の場合は何も出力しない.
+   * @param params {@code msg} の書式指定子に渡す引数
+   */
   void error(String msg, Object... params);
+
+  /**
+   * エラーレベルのメッセージと例外の情報をログに出力する.
+   *
+   * @param msg 出力するメッセージ.  null の場合は何も出力しない.
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を {@code msg} の後ろに出力する.
+   *          null の場合は例外の情報を出力しない.
+   */
+  void error(String msg, Throwable e);
+
+  /**
+   * エラーレベルのメッセージと例外の情報をログに出力する.
+   *
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を {@code msg} の後ろに出力する.
+   *          null の場合は例外の情報を出力しない.
+   * @param msg 出力するメッセージ.  {@link String#format} の書式文字列として扱われる.
+   *            null の場合は何も出力しない.
+   * @param params {@code msg} の書式指定子に渡す引数
+   */
+  void error(Throwable e, String msg, Object... params);
+
+  /**
+   * 例外の情報をエラーレベルのログに出力する.
+   *
+   * @param e このオブジェクトとこのオブジェクトの原因となった例外の情報を出力する.
+   *          null の場合は何も出力しない.
+   */
+  void error(Throwable e);
 }
