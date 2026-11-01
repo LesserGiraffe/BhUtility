@@ -17,12 +17,21 @@
 package net.seapanda.bunnyhop.utility.version;
 
 
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+
 /**
  * アプリケーションのバージョン.
  *
  * @author K.Koike
  */
-public final class AppVersion extends Version {
+@JsonAdapter(AppVersion.Adapter.class)
+public final class AppVersion extends PrefixedVersion {
 
   /** アプリケーションのバージョンが存在しないことを表すオブジェクト. */
   public static final AppVersion NONE = new AppVersion();
@@ -49,5 +58,35 @@ public final class AppVersion extends Version {
   /** デフォルトコンストラクタ. (デシリアライズ用) */
   public AppVersion() {
     super();
+  }
+
+  /** {@link AppVersion} を JSON の文字列として入出力する {@link TypeAdapter}. */
+  static class Adapter extends TypeAdapter<AppVersion> {
+
+    @Override
+    public void write(JsonWriter out, AppVersion value) throws IOException {
+      if (value == null) {
+        out.nullValue();
+        return;
+      }
+      out.value(value.toString());
+    }
+
+    @Override
+    public AppVersion read(JsonReader in) throws IOException {
+      if (in.peek() == JsonToken.NULL) {
+        in.nextNull();
+        return null;
+      }
+      String version = in.nextString();
+      if (version.equals(NONE.version)) {
+        return NONE;
+      }
+      try {
+        return AppVersion.of(version);
+      } catch (IllegalArgumentException e) {
+        throw new JsonSyntaxException(e);
+      }
+    }
   }
 }

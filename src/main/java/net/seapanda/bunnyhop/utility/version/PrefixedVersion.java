@@ -1,7 +1,7 @@
 /*
  * Copyright 2017 K.Koike
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, PrefixedVersion 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -22,14 +22,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 各種バージョンを表すクラスの基底クラス.
+ * 接頭語付きバージョンを表すクラス.
  *
  * @author K.Koike
  */
-public abstract class Version implements Serializable {
+public class PrefixedVersion implements Serializable {
 
   private static final Pattern pattern =
-      Pattern.compile("([a-zA-Z0-9]+)-([1-9]\\d*|0)\\.([1-9]\\d*|0)\\.([1-9]\\d*|0)");
+      Pattern.compile("([a-zA-Z0-9_]+)-([1-9]\\d*|0)\\.([1-9]\\d*|0)\\.([1-9]\\d*|0)");
 
   public final String version;
   public final String prefix;
@@ -37,7 +37,8 @@ public abstract class Version implements Serializable {
   public final int minor;
   public final int patch;
 
-  protected Version() {
+  /** デフォルトコンストラクタ. (デシリアライズ用) */
+  public PrefixedVersion() {
     version = "";
     prefix = "";
     major = Integer.MIN_VALUE;
@@ -50,13 +51,13 @@ public abstract class Version implements Serializable {
    *
    * @param version 識別子名 (例 : bh-2.1.6)
    */
-  protected Version(String version) {
+  public PrefixedVersion(String version) {
     if (version == null) {
-      throw new IllegalArgumentException("Invalid BunnyHop version format (null)");
+      throw new IllegalArgumentException("Invalid version format (null)");
     }
     Matcher matcher = pattern.matcher(version);
     if (!matcher.find()) {
-      throw new IllegalArgumentException("Invalid BunnyHop version format (%s)".formatted(version));
+      throw new IllegalArgumentException("Invalid version format (%s)".formatted(version));
     }
     this.version = version;
     prefix = matcher.group(1);
@@ -71,9 +72,9 @@ public abstract class Version implements Serializable {
    * @return このバージョンの接頭語が指定されたバージョンの接頭語より小さい場合は負の整数,
    *         等しい場合はゼロ, 大きい場合は正の整数.
    */
-  public int comparePrefix(Version other) {
+  public int comparePrefix(PrefixedVersion other) {
     if (other == null) {
-      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
+      throw new NullPointerException("Cannot read field \"prefix\" because \"other\" is null");
     }
     return prefix.compareTo(other.prefix);
   }
@@ -84,9 +85,9 @@ public abstract class Version implements Serializable {
    * @return このバージョンのメジャー番号が指定されたバージョンのメジャー番号より小さい場合は負の整数,
    *         等しい場合はゼロ, 大きい場合は正の整数.
    */
-  public int compareMajor(Version other) {
+  public int compareMajor(PrefixedVersion other) {
     if (other == null) {
-      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
+      throw new NullPointerException("Cannot read field \"major\" because \"other\" is null");
     }
     return Integer.compare(major, other.major);
   }
@@ -97,9 +98,9 @@ public abstract class Version implements Serializable {
    * @return このバージョンのマイナー番号が指定されたバージョンのマイナー番号より小さい場合は負の整数,
    *         等しい場合はゼロ, 大きい場合は正の整数.
    */
-  public int compareMinor(Version other) {
+  public int compareMinor(PrefixedVersion other) {
     if (other == null) {
-      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
+      throw new NullPointerException("Cannot read field \"minor\" because \"other\" is null");
     }
     return Integer.compare(minor, other.minor);
   }
@@ -110,9 +111,9 @@ public abstract class Version implements Serializable {
    * @return このバージョンのパッチ番号が指定されたバージョンのパッチ番号より小さい場合は負の整数,
    *         等しい場合はゼロ, 大きい場合は正の整数.
    */
-  public int comparePatch(Version other) {
+  public int comparePatch(PrefixedVersion other) {
     if (other == null) {
-      throw new NullPointerException("Cannot read field \"other\" because \"other\" is null");
+      throw new NullPointerException("Cannot read field \"patch\" because \"other\" is null");
     }
     return Integer.compare(patch, other.patch);
   }
@@ -127,11 +128,11 @@ public abstract class Version implements Serializable {
     if (other == null || getClass() != other.getClass()) {
       return false;
     }
-    return version.equals(((Version) other).version);
+    return version.equals(((PrefixedVersion) other).version);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(version);
-  }  
+  }
 }
