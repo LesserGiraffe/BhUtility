@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import net.seapanda.bunnyhop.utility.event.ConsumerInvoker;
 import net.seapanda.bunnyhop.utility.event.SimpleConsumerInvoker;
-import net.seapanda.bunnyhop.utility.reference.WritableValue;
+import net.seapanda.bunnyhop.utility.reference.ObservableValue;
 
 /**
  * スレッドセーフに読み書きでき, 値の変更を監視できる値.
@@ -34,14 +34,15 @@ import net.seapanda.bunnyhop.utility.reference.WritableValue;
  * このため, これらの処理の中で別のロックを取得した場合, ロックの獲得順序によってはデッドロックが発生する.
  * また, これらの処理が終わるまで, 他のスレッドはこのオブジェクトの値を読み書きできない.
  *
- * <p>イベントハンドラの中でこのオブジェクトの値を変更した場合, その変更に対するイベントハンドラが
- * 全て呼び出されてから, 元の変更に対する残りのイベントハンドラが呼び出される. <br>
- * このため, 後に呼び出されるイベントハンドラは, 既に古くなった変更内容を受け取ることがある.
+ * <p>イベントハンドラの中でこのオブジェクトの値を変更した場合, 現在の変更に対するイベントハンドラを
+ * 全て呼び出した後に, その新しい変更に対するイベントハンドラが呼び出される. <br>
+ * このため, 各イベントハンドラは全ての変更を発生順に受け取る. <br>
+ * ただし, イベントハンドラが受け取る変更内容と, その中で {@link #get} した値は一致しないことがある.
  *
  * @param <T> このオブジェクトが保持する値の型
  * @author K.Koike
  */
-public class ObservableAtomicValue<T> implements WritableValue<T> {
+public class ObservableAtomicValue<T> implements ObservableValue<T> {
 
   private T val;
   private final ConsumerInvoker<ValueChangeEvent<T>> invoker = new SimpleConsumerInvoker<>();
@@ -148,20 +149,12 @@ public class ObservableAtomicValue<T> implements WritableValue<T> {
     return val;
   }
 
-  /**
-   * このオブジェクトの値が変わったときのイベントハンドラを追加する.
-   *
-   * @param handler 追加するイベントハンドラ
-   */
+  @Override
   public synchronized void addOnValueChanged(Consumer<? super ValueChangeEvent<T>> handler) {
     invoker.getRegistry().add(handler);
   }
 
-  /**
-   * このオブジェクトの値が変わったときのイベントハンドラを削除する.
-   *
-   * @param handler 削除するイベントハンドラ
-   */
+  @Override
   public synchronized void removeOnValueChanged(Object handler) {
     invoker.getRegistry().remove(handler);
   }
@@ -179,15 +172,4 @@ public class ObservableAtomicValue<T> implements WritableValue<T> {
       invoker.invoke(new ValueChangeEvent<>(this, oldVal, newVal));
     }
   }
-
-  /**
-   * {@link ObservableAtomicValue} の値が変わったときの情報を格納したレコード.
-   *
-   * @param <T> 値が変わった {@link ObservableAtomicValue} オブジェクトが保持する値の型
-   * @param observer 値が変わった {@link ObservableAtomicValue} オブジェクト.
-   * @param oldVal 変更前の値
-   * @param newVal 変更後の値
-   */
-  public record ValueChangeEvent<T>(
-      ObservableAtomicValue<T> observer, T oldVal, T newVal) {}
 }

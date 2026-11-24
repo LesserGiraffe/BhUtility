@@ -25,23 +25,58 @@ import net.seapanda.bunnyhop.utility.function.TriConsumer;
 /**
  * {@link TriConsumer} 型のコールバック関数の登録, 削除および呼び出し機能を提供するクラス.
  *
+ * <p>コールバック関数の中で {@link #invoke} を呼び出した場合, その呼び出しは現在のコールバック関数列を
+ * 呼び出し終えてから処理される. <br>
+ * このため, 各コールバック関数は {@link #invoke} に渡された引数を, 渡された順に受け取る.
+ *
+ * <p>コールバック関数が例外を投げた場合, 未処理の {@link #invoke} の要求は破棄される.
+ *
  * @author K.Koike
  */
 public class SimpleTriConsumerInvoker<U, V, W> extends TriConsumerInvoker<U, V, W> {
 
   private final Registry registry = new Registry();
+  /** {@link #invoke} の実行中に要求された呼び出しの引数を, 要求された順に格納するキュー. */
+  private final SequencedCollection<Args<U, V, W>> pending = new ArrayList<>();
+  /** {@link #invoke} を実行中の場合 true. */
+  private boolean invoking;
 
   @Override
   public void invoke(U u, V v, W w) {
-    registry.first.accept(u, v, w);
-    List.copyOf(registry.funcs).forEach(fn -> fn.accept(u, v, w));
-    registry.last.accept(u, v, w);
+    pending.addLast(new Args<>(u, v, w));
+    // 既に呼び出し中の場合, 現在のコールバック関数列を呼び出し終えてから引数を処理する.
+    if (invoking) {
+      return;
+    }
+    invoking = true;
+    try {
+      do {
+        invokeAll(pending.removeFirst());
+      } while (!pending.isEmpty());
+    } finally {
+      invoking = false;
+      pending.clear();
+    }
+  }
+
+  /**
+   * このオブジェクトに登録された全てのコールバック関数を {@code args} を引数にして呼び出す.
+   *
+   * @param args コールバック関数に与える引数
+   */
+  private void invokeAll(Args<U, V, W> args) {
+    registry.first.accept(args.u(), args.v(), args.w());
+    List.copyOf(registry.funcs).forEach(fn -> fn.accept(args.u(), args.v(), args.w()));
+    registry.last.accept(args.u(), args.v(), args.w());
   }
 
   @Override
   public Registry getRegistry() {
     return registry;
   }
+
+  /** {@link #invoke} に渡された引数の組. */
+  private record Args<U, V, W>(U u, V v, W w) {}
 
   /**
    * {@link TriConsumer} 型のコールバック関数を格納するレジストリ.
